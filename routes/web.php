@@ -17,3 +17,7 @@ Route::get('/ai-interview', function () {
 Route::get('/expert-interview', function () {
     return view('pages.expert-interview');
 });
+
+Route::get('/contact', function () {
+    return view('pages.contact');
+});
