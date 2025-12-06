@@ -97,9 +97,8 @@
                 <li><a href="{{ url('/ai-interview') }}">AI Interview</a></li>
                 <li><a href="{{ url('/expert-interview') }}">Expert Interview</a></li>
                 <li><a href="{{ url('/about') }}">About Us</a></li>
-                  <li>
-                        <a href="{{ url('/contact') }}" >CONTACT</a>
-                    </li>
+                <li> <a href="{{ url('/contact') }}" >Contact Us</a> </li>
+                <li> <a href="{{ url('/dashboard') }}" >Dashboard</a> </li>
             </ul>
         </div>
         <div class="footer-links">
