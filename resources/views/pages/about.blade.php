@@ -300,7 +300,7 @@
         <div class="team-grid">
             <div class="team-card">
                 <div class="team-avatar">
-                    <img src="{{ asset('assets/images/nahid.jpg') }}" alt="Alex Morgan">
+                    <img src="{{ asset('assets/images/nahid.jpg') }}" alt="nahid image">
                 </div>
                 <h3 class="team-name">S M NAHID HASAN</h3>
                 <span class="team-role">Project Lead & Full Stack Developer</span>
@@ -309,7 +309,7 @@
 
             <div class="team-card">
                 <div class="team-avatar">
-                    <img src="{{ asset('assets/images/tamim.jpg') }}" alt="Sarah Johnson">
+                    <img src="{{ asset('assets/images/tamim.jpg') }}" alt="tamim image">
                 </div>
                 <h3 class="team-name">Tamim Hasan</h3>
                 <span class="team-role">Frontend Developer</span>
@@ -318,7 +318,7 @@
 
             <div class="team-card">
                 <div class="team-avatar">
-                    <img src="{{ asset('assets/images/nirob.jpg') }}" alt="Michael Chen">
+                    <img src="{{ asset('assets/images/nirob.JPG') }}" alt="nirob image">
                 </div>
                 <h3 class="team-name">Nahid Hasan Nirob</h3>
                 <span class="team-role">Backend Developer</span>
@@ -327,7 +327,7 @@
 
             <div class="team-card">
                 <div class="team-avatar">
-                    <img src="{{ asset('assets/images/maruf,jpg.jpg') }}" alt="Emily Rodriguez">
+                    <img src="{{ asset('assets/images/maruf.jpg') }}" alt="maruf image">
                 </div>
                 <h3 class="team-name">Maruf Akter John</h3>
                 <span class="team-role">UI/UX Designer</span>
@@ -336,7 +336,7 @@
 
             <div class="team-card">
                 <div class="team-avatar">
-                    <img src="{{ asset('assets/images/shwon.png') }}" alt="David Thompson">
+                    <img src="{{ asset('assets/images/shawon.png') }}" alt="shawon image">
                 </div>
                 <h3 class="team-name">Shahriar Antor Shawon</h3>
                 <span class="team-role">DevOps & System Architect</span>
