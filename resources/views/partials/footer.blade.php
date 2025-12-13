@@ -119,6 +119,6 @@
         </div>
     </div>
     <div class="footer-bottom">
-        © {{ date('Y') }} MockMate Labs. Crafted for ambitious interviewees everywhere. 
+        © {{ date('Y') }} MockMate Labs. Crafted for ambitious interviewees everywhere . 
     </div>
 </footer>
