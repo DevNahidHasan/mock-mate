@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InterviewController;
 
 // Public pages
 Route::get('/', function () {
@@ -53,3 +54,13 @@ Route::get('/dashboard', [AuthController::class, 'dashboard'])
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+// ---------- AI Interview API routes ---------- //
+Route::post('/api/interview/generate-question', [InterviewController::class, 'generateQuestion'])
+    ->name('interview.generate');
+
+Route::post('/api/interview/evaluate-answer', [InterviewController::class, 'evaluateAnswer'])
+    ->name('interview.evaluate');
+
+Route::post('/api/interview/generate-feedback', [InterviewController::class, 'generateFeedback'])
+    ->name('interview.feedback');
