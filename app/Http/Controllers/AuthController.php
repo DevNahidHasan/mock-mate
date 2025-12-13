@@ -8,13 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // Show signup page
     public function showSignup()
     {
         return view('pages.signup');
     }
 
-    // Handle signup
     public function signup(Request $request)
     {
         $validated = $request->validate([
@@ -23,12 +21,11 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        // Laravel auto-hashes the password because User model has:
-        // protected function casts(): ['password' => 'hashed']
         $user = User::create([
             'name'     => $validated['name'],
             'email'    => $validated['email'],
-            'password' => $validated['password'], // no Hash::make needed!
+            'password' => $validated['password'],
+            'role'     => 'user',
         ]);
 
         Auth::login($user);
@@ -36,13 +33,11 @@ class AuthController extends Controller
         return redirect()->route('dashboard');
     }
 
-    // Show login page
     public function showLogin()
     {
         return view('pages.login');
     }
 
-    // Handle login
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -60,20 +55,24 @@ class AuthController extends Controller
         ]);
     }
 
-    // Dashboard
     public function dashboard()
     {
-        $users = User::orderByDesc('id')->get();
-        $totalUsers = $users->count();
+        $user = auth()->user();
 
-        return view('pages.dashboard', compact('users', 'totalUsers'));
+        if ($user->role === 'admin') {
+            $users = User::latest()->get();
+            $totalUsers = $users->count();
+
+            return view('pages.dashboard-admin', compact('user', 'users', 'totalUsers'));
+
+        }
+
+        return view('pages.dashboard', compact('user'));
     }
 
-    // Logout
     public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

@@ -53,3 +53,13 @@ Route::get('/dashboard', [AuthController::class, 'dashboard'])
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+    Route::middleware(['auth'])->group(function () {
+
+    Route::post('/admin/user/{id}/promote', [AdminController::class, 'promoteUser'])
+        ->name('admin.user.promote');
+
+    Route::delete('/admin/user/{id}', [AdminController::class, 'deleteUser'])
+        ->name('admin.user.delete');
+
+});
