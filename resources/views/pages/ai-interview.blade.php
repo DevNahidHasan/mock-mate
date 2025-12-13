@@ -100,6 +100,11 @@
         transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
     .btn-primary {
         background: linear-gradient(135deg, #fb923c, #f97316);
         color: #fff;
@@ -112,7 +117,7 @@
         color: #111827;
     }
 
-    .btn:active {
+    .btn:active:not(:disabled) {
         transform: scale(0.98);
     }
 
@@ -243,7 +248,7 @@
             </section>
 
             <section class="panel" id="questionPanel">
-                <div class="question-number" id="questionNumber">Question 1</div>
+                <div class="question-number" id="questionNumber">Question 0</div>
                 <h2 class="question-text" id="questionText">Select a track to generate the first AI question.</h2>
                 <div class="ai-hint" id="aiHint">
                     Pick a role and level to let the AI build a tailored interview plan just for you.
@@ -285,154 +290,16 @@
 </div>
 
 <script>
-    const questionBank = {
-        frontend: {
-            junior: [
-                {
-                    question: "Explain the CSS box model and why it matters for layout.",
-                    keywords: ["content", "padding", "border", "margin"],
-                    tip: "Revisit how the box model impacts spacing and layout calculations."
-                },
-                {
-                    question: "How does Flexbox differ from CSS Grid? When would you choose each?",
-                    keywords: ["one-dimensional", "two-dimensional", "layout", "flex"],
-                    tip: "Highlight strengths of each system with practical scenarios."
-                },
-                {
-                    question: "Describe how event bubbling works in the DOM.",
-                    keywords: ["propagation", "capturing", "bubbling", "stop"],
-                    tip: "Outline the propagation phases and how to interrupt them."
-                },
-                {
-                    question: "What problem does React's virtual DOM solve?",
-                    keywords: ["diffing", "re-render", "performance", "state"],
-                    tip: "Connect the virtual DOM to rendering efficiency."
-                },
-                {
-                    question: "How would you optimize images for the web?",
-                    keywords: ["compression", "lazy", "responsive", "formats"],
-                    tip: "Mention responsive images, compression, and loading strategies."
-                }
-            ],
-            mid: [
-                {
-                    question: "Walk through how you would diagnose a layout bug that only appears in Safari.",
-                    keywords: ["devtools", "browser", "prefix", "flexbox"],
-                    tip: "Talk about browser differences, testing strategy, and polyfills."
-                },
-                {
-                    question: "Describe how you structure a scalable component system.",
-                    keywords: ["design system", "tokens", "reusable", "documentation"],
-                    tip: "Explain naming, documentation, and shared tokens."
-                },
-                {
-                    question: "What are render props and custom hooks? When would you use them?",
-                    keywords: ["reuse", "logic", "React", "hooks"],
-                    tip: "Compare both patterns with use cases."
-                }
-            ],
-            senior: [
-                {
-                    question: "Outline a strategy for progressively migrating a legacy jQuery app to React.",
-                    keywords: ["incremental", "dual", "bridge", "rewrite"],
-                    tip: "Emphasize risk mitigation and phased rollouts."
-                },
-                {
-                    question: "How do you measure and enforce performance budgets on a large SPA?",
-                    keywords: ["LCP", "bundle", "monitoring", "budgets"],
-                    tip: "Discuss metrics, tooling, and governance."
-                },
-                {
-                    question: "Explain how you would architect micro frontends for a marketplace.",
-                    keywords: ["isolation", "routing", "deployment", "integration"],
-                    tip: "Touch on build independence and shared contracts."
-                }
-            ]
-        },
-        backend: {
-            junior: [
-                {
-                    question: "What is the difference between authentication and authorization?",
-                    keywords: ["identity", "access", "permissions", "login"],
-                    tip: "Clarify authN vs authZ with examples."
-                },
-                {
-                    question: "Explain RESTful principles in simple terms.",
-                    keywords: ["stateless", "resources", "verbs", "representations"],
-                    tip: "Mention HTTP verbs and resource modeling."
-                }
-            ],
-            mid: [
-                {
-                    question: "How would you design rate limiting for a public API?",
-                    keywords: ["throttle", "token bucket", "redis", "quota"],
-                    tip: "Cover algorithms, storage, and penalty strategy."
-                }
-            ],
-            senior: [
-                {
-                    question: "Describe your approach to evolving a monolith into microservices.",
-                    keywords: ["decomposition", "boundaries", "data", "observability"],
-                    tip: "Focus on slicing strategy and operational maturity."
-                }
-            ]
-        },
-        datascience: {
-            junior: [
-                {
-                    question: "Why do we split data into training and test sets?",
-                    keywords: ["generalization", "overfitting", "evaluation", "bias"],
-                    tip: "Explain how separation protects against overfitting."
-                }
-            ],
-            mid: [
-                {
-                    question: "Compare precision and recall in classification tasks.",
-                    keywords: ["false positives", "false negatives", "sensitivity", "tradeoff"],
-                    tip: "Use practical examples such as medical diagnosis."
-                }
-            ],
-            senior: [
-                {
-                    question: "How do you productionize and monitor ML models?",
-                    keywords: ["drift", "pipelines", "metrics", "retraining"],
-                    tip: "Discuss deployment, monitoring, and retraining triggers."
-                }
-            ]
-        },
-        product: {
-            junior: [
-                {
-                    question: "What makes a good product requirement document?",
-                    keywords: ["outcomes", "users", "scope", "success"],
-                    tip: "Emphasize clarity, success metrics, and user context."
-                }
-            ],
-            mid: [
-                {
-                    question: "How do you prioritize roadmap items with conflicting stakeholders?",
-                    keywords: ["framework", "RICE", "impact", "alignment"],
-                    tip: "Show structured prioritization and communication."
-                }
-            ],
-            senior: [
-                {
-                    question: "Walk me through scaling a product globally.",
-                    keywords: ["localization", "regulation", "operations", "research"],
-                    tip: "Highlight research, compliance, and phased rollout."
-                }
-            ]
-        }
-    };
-
     const state = {
-        questions: [],
+        currentQuestion: null,
         currentIndex: 0,
+        totalQuestions: 5,
         correct: 0,
         wrong: 0,
         activeRole: 'frontend',
         activeLevel: 'junior',
-        history: []
+        history: [],
+        isLoading: false
     };
 
     const roleSelect = document.getElementById('roleSelect');
@@ -452,28 +319,70 @@
     const submitBtn = document.getElementById('submitAnswer');
     const skipBtn = document.getElementById('skipQuestion');
 
-    const getQuestionSet = (role, level) => {
-        const bank = questionBank[role]?.[level] || [];
-        return bank
-            .map(item => ({ ...item }))
-            .sort(() => Math.random() - 0.5)
-            .slice(0, Math.min(bank.length, 5));
-    };
+    // Get CSRF token for Laravel
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
     const updateStats = () => {
-        totalQuestionsEl.textContent = state.questions.length;
+        totalQuestionsEl.textContent = state.currentIndex;
         correctAnswersEl.textContent = state.correct;
         wrongAnswersEl.textContent = state.wrong;
 
-        const totalAnswered = state.correct + state.wrong;
-        const progress = state.questions.length
-            ? (totalAnswered / state.questions.length) * 100
+        const progress = state.totalQuestions
+            ? (state.currentIndex / state.totalQuestions) * 100
             : 0;
         progressBar.style.width = progress + '%';
     };
 
+    const setLoading = (loading) => {
+        state.isLoading = loading;
+        startBtn.disabled = loading;
+        submitBtn.disabled = loading;
+        skipBtn.disabled = loading;
+        
+        if (loading) {
+            submitBtn.textContent = 'Loading...';
+        } else {
+            submitBtn.textContent = 'Submit Answer';
+        }
+    };
+
+    const generateQuestion = async () => {
+        setLoading(true);
+        
+        try {
+            const response = await fetch('/api/interview/generate-question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    role: state.activeRole,
+                    level: state.activeLevel
+                })
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to generate question');
+            }
+
+            state.currentQuestion = data.question;
+            state.currentIndex += 1;
+            
+            updateQuestionView();
+            updateStats();
+        } catch (error) {
+            alert('Error generating question: ' + error.message);
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const updateQuestionView = () => {
-        if (!state.questions.length) {
+        if (!state.currentQuestion) {
             questionNumber.textContent = 'Question 0';
             questionText.textContent = 'Select a track to generate the first AI question.';
             aiHint.textContent = 'Pick a role and level to let the AI build a tailored interview plan just for you.';
@@ -481,73 +390,122 @@
             return;
         }
 
-        const current = state.questions[state.currentIndex];
-        questionNumber.textContent = `Question ${state.currentIndex + 1} of ${state.questions.length}`;
-        questionText.textContent = current.question;
-        aiHint.textContent = `AI focus: ${current.tip}`;
+        questionNumber.textContent = `Question ${state.currentIndex} of ${state.totalQuestions}`;
+        questionText.textContent = state.currentQuestion;
+        aiHint.textContent = `AI will evaluate your answer and provide personalized feedback.`;
         answerInput.value = '';
         answerInput.focus();
     };
 
-    const evaluateAnswer = () => {
-        if (!state.questions.length) {
+    const evaluateAnswer = async () => {
+        if (!state.currentQuestion) {
             alert('Start an interview first.');
             return;
         }
 
-        const response = answerInput.value.trim().toLowerCase();
+        const response = answerInput.value.trim();
         if (!response) {
             alert('Type your answer before submitting.');
             return;
         }
 
-        const currentQuestion = state.questions[state.currentIndex];
-        const keywords = currentQuestion.keywords;
-        const matches = keywords.filter(word => response.includes(word));
-        const threshold = Math.max(1, Math.ceil(keywords.length * 0.6));
-        const isCorrect = matches.length >= threshold;
+        setLoading(true);
 
-        if (isCorrect) {
-            state.correct += 1;
-        } else {
-            state.wrong += 1;
+        try {
+            const apiResponse = await fetch('/api/interview/evaluate-answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    question: state.currentQuestion,
+                    answer: response,
+                    role: state.activeRole,
+                    level: state.activeLevel
+                })
+            });
+
+            const data = await apiResponse.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to evaluate answer');
+            }
+
+            const evaluation = data.evaluation;
+            
+            if (evaluation.isCorrect) {
+                state.correct += 1;
+            } else {
+                state.wrong += 1;
+            }
+
+            state.history.push({
+                question: state.currentQuestion,
+                answer: response,
+                evaluation: evaluation
+            });
+
+            displayEvaluation(evaluation);
+            moveToNextQuestion();
+        } catch (error) {
+            alert('Error evaluating answer: ' + error.message);
+            console.error(error);
+            setLoading(false);
         }
+    };
 
-        state.history.push({ question: currentQuestion, correct: isCorrect });
-        summaryContent.innerHTML = buildSummary(isCorrect, currentQuestion, matches.length, keywords.length);
-        moveToNextQuestion();
+    const displayEvaluation = (evaluation) => {
+        const scoreColor = evaluation.isCorrect ? '#15803d' : '#b91c1c';
+        
+        summaryContent.innerHTML = `
+            <p style="font-weight:600;color:${scoreColor};">Score: ${evaluation.score}</p>
+            <p><strong>Feedback:</strong> ${evaluation.feedback}</p>
+            <p><strong>Tip:</strong> ${evaluation.tip}</p>
+        `;
     };
 
     const skipQuestion = () => {
-        if (!state.questions.length) {
+        if (!state.currentQuestion) {
             alert('Start an interview first.');
             return;
         }
 
         state.wrong += 1;
-        state.history.push({ question: state.questions[state.currentIndex], correct: false });
+        state.history.push({
+            question: state.currentQuestion,
+            answer: 'Skipped',
+            evaluation: { score: 'Skipped', isCorrect: false }
+        });
+
         summaryContent.innerHTML = `
             <p style="font-weight:600;color:#b91c1c;">Question skipped.</p>
             <p>Skipping counts as a missed opportunity. Try to attempt each question to build real interview stamina.</p>
         `;
+        
         moveToNextQuestion();
     };
 
     const moveToNextQuestion = () => {
         updateStats();
-        const isLast = state.currentIndex >= state.questions.length - 1;
+        
+        const isLast = state.currentIndex >= state.totalQuestions;
         if (isLast) {
             summarizeInterview();
             return;
         }
-        state.currentIndex += 1;
-        updateQuestionView();
+        
+        // Generate next question
+        setTimeout(() => {
+            generateQuestion();
+        }, 1000);
     };
 
-    const summarizeInterview = () => {
-        const total = state.questions.length;
+    const summarizeInterview = async () => {
+        const total = state.currentIndex;
         const scorePercent = total ? Math.round((state.correct / total) * 100) : 0;
         let tone = 'Keep practicing to improve consistency.';
+        
         if (scorePercent >= 80) {
             tone = 'Outstanding work! You are interview ready.';
         } else if (scorePercent >= 60) {
@@ -556,43 +514,73 @@
             tone = 'Decent effort. Focus on reinforcing fundamentals.';
         }
 
-        const uniqueTips = new Set(
-            state.history
-                .filter(entry => !entry.correct)
-                .map(entry => entry.question.tip)
-        );
-        const missedTips = Array.from(uniqueTips)
-            .map(tip => `<li>${tip}</li>`)
+        const historyList = state.history
+            .map((item, i) => `
+                <li style="margin-bottom:0.5rem;">
+                    <strong>Q${i+1}:</strong> ${item.evaluation.score}
+                </li>
+            `)
             .join('');
 
         summaryContent.innerHTML = `
             <p style="font-size:1.1rem;font-weight:600;">Final Score: ${scorePercent}%</p>
             <p>${tone}</p>
-            ${missedTips ? `<p>Suggested focus areas:</p><ul>${missedTips}</ul>` : '<p>Great coverage across all topics. Keep the momentum!</p>'}
+            <p>Questions answered: ${total}</p>
+            
+            <div id="ai-feedback-section" style="margin-top:20px; padding:15px; background:#f3f4f6; border-radius:8px; border:1px solid #e5e7eb;">
+                <p style="font-weight:600; color:#4b5563; display:flex; align-items:center; gap:10px;">
+                    Generating comprehensive AI feedback...
+                    <span style="display:inline-block; width:16px; height:16px; border:2px solid #ddd; border-top-color:#fb923c; border-radius:50%; animation: spin 1s linear infinite;"></span>
+                </p>
+                <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+            </div>
+
+            <ul style="margin-top:20px;">${historyList}</ul>
         `;
 
         questionNumber.textContent = 'Interview complete';
         questionText.textContent = 'Reset or choose another track to keep practicing.';
         aiHint.textContent = 'Use your summary insights to decide what to rehearse next.';
-    };
+        state.currentQuestion = null;
 
-    const buildSummary = (isCorrect, question, matches, totalKeywords) => {
-        if (isCorrect) {
-            return `
-                <p style="font-weight:600;color:#15803d;">Strong answer!</p>
-                <p>You covered ${matches}/${totalKeywords} high-signal concepts for this question.</p>
-            `;
+        // Call API for detailed feedback
+        try {
+            const response = await fetch('/api/interview/generate-feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    history: state.history,
+                    role: state.activeRole,
+                    level: state.activeLevel
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                // Formatting markdown-style bold and newlines
+                let htmlFeedback = data.feedback
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br>');
+
+                document.getElementById('ai-feedback-section').innerHTML = `
+                    <h3 style="font-size:1.1rem; color:#1f2933; margin-bottom:10px; border-bottom:1px solid #ddd; padding-bottom:5px;">AI Performance Analysis</h3>
+                    <div style="font-size:0.95rem; line-height:1.6; color:#374151;">${htmlFeedback}</div>
+                `;
+            } else {
+                document.getElementById('ai-feedback-section').innerHTML = `<p style="color:#b91c1c;">Could not generate detailed feedback. (${data.error || 'Unknown error'})</p>`;
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('ai-feedback-section').innerHTML = `<p style="color:#b91c1c;">Error retrieving feedback. Please check your connection.</p>`;
         }
-
-        return `
-            <p style="font-weight:600;color:#b91c1c;">Partial answer detected.</p>
-            <p>Touch on: <strong>${question.keywords.join(', ')}</strong></p>
-            <p>Tip: ${question.tip}</p>
-        `;
     };
 
     const resetInterview = () => {
-        state.questions = [];
+        state.currentQuestion = null;
         state.currentIndex = 0;
         state.correct = 0;
         state.wrong = 0;
@@ -607,27 +595,18 @@
         const level = levelSelect.value;
         state.activeRole = role;
         state.activeLevel = level;
-        const questionSet = getQuestionSet(role, level);
-
-        if (!questionSet.length) {
-            summaryContent.innerHTML = `
-                <p style="color:#b91c1c;font-weight:600;">No data yet for this track.</p>
-                <p>Try another role/level combination while we train more AI prompts.</p>
-            `;
-            return;
-        }
-
-        state.questions = questionSet;
         state.currentIndex = 0;
         state.correct = 0;
         state.wrong = 0;
         state.history = [];
+        
         updateStats();
-        updateQuestionView();
         summaryContent.innerHTML = `
-            <p style="font-weight:600;">New interview started: ${role.replace(/^[a-z]/, c => c.toUpperCase())} - ${level}</p>
-            <p>Answer thoughtfully. The AI will auto-score and share targeted advice.</p>
+            <p style="font-weight:600;">New AI interview started: ${role.replace(/^[a-z]/, c => c.toUpperCase())} - ${level}</p>
+            <p>Answer thoughtfully. The AI will evaluate and share targeted advice.</p>
         `;
+        
+        generateQuestion();
     });
 
     submitBtn.addEventListener('click', evaluateAnswer);
@@ -635,4 +614,3 @@
     resetBtn.addEventListener('click', resetInterview);
 </script>
 @endsection
-
