@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\InterviewController;
 
 // Public pages
 Route::get('/', fn () => view('pages.home'))->name('home');
@@ -30,4 +31,11 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/admin/user/{id}', [AdminController::class, 'deleteUser'])
         ->name('admin.user.delete');
+});
+
+// AI Interview API Routes
+Route::prefix('api/interview')->group(function () {
+    Route::post('/generate-question', [InterviewController::class, 'generateQuestion'])->name('interview.generate');
+    Route::post('/evaluate-answer', [InterviewController::class, 'evaluateAnswer'])->name('interview.evaluate');
+    Route::post('/generate-feedback', [InterviewController::class, 'generateFeedback'])->name('interview.feedback');
 });
