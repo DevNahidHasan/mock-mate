@@ -4,7 +4,6 @@ MockMate is a smart, skill-specific mock interview platform designed to help job
 
 The platform provides personalized performance insights, structured evaluations, and dynamic AI-generated support to help users improve consistently.
 
-⸻
 
 🚀 Purpose
 
@@ -16,7 +15,6 @@ The purpose of MockMate is to empower job seekers with:
 
 MockMate aims to boost confidence, readiness, and employability through consistent, high-quality practice.
 
-⸻
 
 🎯 Goals
 
@@ -57,7 +55,6 @@ Use AI to:
 
 Implement a seamless real-time video/audio conferencing system using WebRTC for conducting live mock interviews.
 
-⸻
 
 🛠️ Tech Stack
 
@@ -76,7 +73,6 @@ Video & Audio Conferencing
 AI Integration
 	•	OpenAI APIs (for question generation, transcript analysis, feedback summarization)
 
-⸻
 
 📌 Project Status
 
